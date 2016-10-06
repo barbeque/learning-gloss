@@ -13,7 +13,7 @@ background = white
 
 {- Return what to draw -}
 drawing :: Picture
-drawing = translate 10 10 (circle 80) {- circle, radius 80 -}
+drawing = Pictures [translate 10 10 (circle 80), (circleSolid 10)] {- circle, radius 80 -}
 
 main :: IO ()
 {- Display expects a display mode, background colour, and something to draw... -}
