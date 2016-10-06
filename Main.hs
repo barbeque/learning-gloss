@@ -7,26 +7,47 @@ width = 300
 height = 300
 offset = 100
 
-{- Return display mode -}
-window :: Display
-{- InWindow constructor means windowed, FullScreen full -}
-window = InWindow "pongle" (width, height) (offset, offset)
+-- | Describes game state
+data PongGame = Game {
+  ballPosition :: (Float, Float), -- ^ ball x,y loc
+  ballVelocity :: (Float, Float), -- ^ ball vx, vy
+  leftPlayerY :: Float, -- ^ Y position of left paddle
+  rightPlayerY :: Float -- ^ Y position of right paddle, 0 = middle
+} deriving Show
 
-{- Return background colour -}
-background :: Color
-background = black
+initialState :: PongGame
+initialState = Game {
+  ballPosition = (-10, 30),
+  ballVelocity = (1, -3),
+  leftPlayerY = 40,
+  rightPlayerY = (-80)
+}
 
-{- Return what to draw -}
-drawing :: Picture
-drawing = Pictures
+-- | Game update function.
+moveBall ::
+  Float ->      -- ^ delta time since last update
+  PongGame ->   -- ^ game state before update
+  PongGame      -- ^ updated game state
+moveBall t game =
+  game { ballPosition = (x', y') }
+  where
+    (x, y) = ballPosition game
+    (vx, vy) = ballVelocity game
+    -- New locations
+    x' = x + vx * t
+    y' = y + vy * t
+
+-- | Draw the current state of the game
+render :: PongGame -> Picture
+render game = Pictures
           [
             ball, walls,
-            paddle rose 120 (-20),
-            paddle orange (-120) 40
+            paddle rose 120 (leftPlayerY game),
+            paddle orange (-120) (rightPlayerY game)
           ]
           where
             -- pong ball
-            ball = translate (-10) 40 $ color ballColor $ circleSolid 10
+            ball = uncurry translate (ballPosition game) $ color ballColor $ circleSolid 10
             ballColor = dark red
 
             -- bottom, top walls
@@ -43,7 +64,19 @@ drawing = Pictures
                     ]
             paddleColour = light (light blue)
 
+{- Return display mode -}
+window :: Display
+{- InWindow constructor means windowed, FullScreen full -}
+window = InWindow "pongle" (width, height) (offset, offset)
+
+{- Return background colour -}
+background :: Color
+background = black
+
 main :: IO ()
 {- Display expects a display mode, background colour, and something to draw... -}
 {- Drawing is actually a function that produces a drawing for a float -}
-main = display window background drawing
+main = animate window background frame
+  where
+    frame :: Float -> Picture
+    frame seconds = render $ moveBall seconds initialState
