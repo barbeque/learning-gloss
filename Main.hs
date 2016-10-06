@@ -19,12 +19,29 @@ background = black
 {- Return what to draw -}
 drawing :: Picture
 drawing = Pictures
-          [ translate (-20) (-100) $ color ballColor $ circleSolid 30,
-            translate 30 50 $ color paddleColor $ rectangleSolid 10 50
+          [
+            ball, walls,
+            paddle rose 120 (-20),
+            paddle orange (-120) 40
           ]
           where
+            -- pong ball
+            ball = translate (-10) 40 $ color ballColor $ circleSolid 10
             ballColor = dark red
-            paddleColor = light (light blue) {- this is so slick -}
+
+            -- bottom, top walls
+            wall :: Float -> Picture
+            wall offset = translate 0 offset $ color wallColor $ rectangleSolid 270 10
+            wallColor = greyN 0.5
+            walls = Pictures [wall 150, wall (-150)]
+
+            paddle :: Color -> Float -> Float -> Picture
+            paddle colour x y = pictures
+                    [
+                      translate x y $ color colour $ rectangleSolid 26 86,
+                      translate x y $ color paddleColour $ rectangleSolid 20 80
+                    ]
+            paddleColour = light (light blue)
 
 main :: IO ()
 {- Display expects a display mode, background colour, and something to draw... -}
