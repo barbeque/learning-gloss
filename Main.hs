@@ -24,7 +24,7 @@ drawing = Pictures
           ]
           where
             ballColor = dark red
-            paddleColor = light (light blue)
+            paddleColor = light (light blue) {- this is so slick -}
 
 main :: IO ()
 {- Display expects a display mode, background colour, and something to draw... -}
